@@ -16,6 +16,9 @@ import StripeCallback from './stripe/StripeCallback';
 import LocationSearchInput from './components/GooglePlaces';
 import EditHotel from './hotels/EditHotel';
 import ViewHotel from './hotels/ViewHotel';
+import StripeCancel from './stripe/StripeCancel';
+import StripeSuccess from './stripe/StripeSuccess';
+import SearchResult from './hotels/SearchResult';
 
 function App() {
   return (
@@ -26,13 +29,16 @@ function App() {
         <Route exact path='/' component={Home} />
         <Route exact path='/login' component={Login} />
         <Route exact path='/register' component={Register} />
+        <Route exact path='/hotel/:hotelId' component={ViewHotel} />
+        <Route exact path='/search-result' component={SearchResult} />
         <PrivateRoute exact path='/dashboard' component={Dashboard} />
         <PrivateRoute exact path='/dashboard/seller' component={DashboardSeller} />
         <PrivateRoute exact path='/hotels/new' component={NewHotel} />
         <PrivateRoute exact path='/stripe/callback' component={StripeCallback} />
         <PrivateRoute exact path='/location' component={LocationSearchInput} />
         <PrivateRoute exact path='/hotel/edit/:hotelId' component={EditHotel} />
-        <Route exact path='/hotel/:hotelId' component={ViewHotel} />
+        <PrivateRoute exact path='/stripe/cancel' component={StripeCancel} />
+        <PrivateRoute exact path='/stripe/success/:hotelId' component={StripeSuccess} />
       </Switch>
     </BrowserRouter>
   );

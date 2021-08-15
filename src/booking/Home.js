@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { allHotels } from "../actions/hotel";
 import { SmallCard } from "../components/cards/SmallCard";
+import Search from '../components/forms/Search';
 const Home=() => {
     const [hotels,setHotels]=useState([]);
 
@@ -15,6 +16,10 @@ const Home=() => {
         <>
             <div className="container-fluid bg-secondary h1 p-5 text-center">
                 All Hotels
+            </div>
+            <div className="col">
+                <br/>
+                <Search />
             </div>
             <div className="container-fluid ">
                 <pre>{/*JSON.stringify(hotels,null,4)*/}</pre>

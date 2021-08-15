@@ -1,19 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { diffDays, readHotel } from '../actions/hotel';
+import { diffDays, isAlreadyBooked, readHotel } from '../actions/hotel';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
+import { getSessionId } from '../actions/stripe';
+import { loadStripe } from '@stripe/stripe-js';
 
-const ViewHotel=({match}) => {
-
+const ViewHotel=({match,history}) => {
+    const { auth }=useSelector((state) => ({...state}))
+;
     const [hotel,setHotel]=useState({});
     const [image,setImage]=useState('');
+    const [loading, setLoading]=useState(false);
+    const [alreadyBooked, setAlreadyBooked]=useState(false);
     useEffect(() => {
         loadSellerHotel();
     },[])
+    useEffect(() => {
+        if(auth && auth.token){
+            isAlreadyBooked(auth.token,match.params.hotelId)
+            .then(res => {
+                if(res.data.ok)
+                    setAlreadyBooked(true);
+            })
+        }
+    },[])
+
     const loadSellerHotel=async () => {
         let res=await readHotel(match.params.hotelId);
         //console.log(res);
         setHotel(res.data);
         setImage(`${process.env.REACT_APP_API}/hotel/image/${res.data._id}`);
+    }
+    const handleClick=async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        if(!auth){
+            history.push('/login');
+        }else{
+            //console.log(auth.token,match.params.hotelId);
+            let res=await getSessionId(auth.token,match.params.hotelId);
+            //console.log('GET SESSION ID',res.data.sessionId);
+            const stripe=await loadStripe(process.env.REACT_APP_STRIPE_KEY);
+            stripe.redirectToCheckout({
+                sessionId : res.data.sessionId
+            }).then(res => {
+                console.log(res);
+            })
+        }
     }
     return (
         <>
@@ -46,8 +79,13 @@ const ViewHotel=({match}) => {
                             {moment(new Date(hotel.to)).format('MMMM Do YYYY, [11]:[00]:[00] a')}
                         </p>
                         <i>Posted by {hotel.postedBy && hotel.postedBy.name } </i>
-                        <button className="btn btn-block btn-lg btn-primary mt-3">
-                            Book Now
+                        <button onClick={handleClick} 
+                            className="btn btn-block btn-lg btn-primary mt-3"
+                            disabled={loading || alreadyBooked}    
+                        >
+                            {loading ? "Loading..." :
+                                alreadyBooked ? "Already Booked" : 
+                                    auth && auth.token ? "Book Now" : "Login to Book"}
                         </button>
                     </div>
                 </div>
